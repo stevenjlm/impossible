@@ -24,7 +24,7 @@ STREAM_VERSION = '1.1'
 
 class StreamListener(object):
   
-    test_var=0
+    #tweet_count=0
     #=============================================
     con = lite.connect(database='tweets.db') 
 	  

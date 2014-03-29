@@ -38,12 +38,22 @@ try:
         if data == None:
             break
         
-        try:
-	  new_rt=api.get_status(data[1])
-	  update_tuple.append((new_rt.retweeted,data[0]))
-	  print new_rt.retweeted
-	except tweepy.error.TweepError:
-	  print("error")
+        #3 attemps
+        attempts=0
+        try_again=True
+        while try_again:
+	  try:
+	    new_rt=api.get_status(data[1])
+	    update_tuple.append((new_rt.retweeted,data[0]))
+	    print new_rt.retweeted
+	  except tweepy.error.TweepError:
+	    attempts+=1
+	    if attempts > 2:
+	      try_again=False
+	      print("error")
+	 
+	attempts=0
+        try_again=True
         
         
     

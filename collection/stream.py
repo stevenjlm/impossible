@@ -1,76 +1,108 @@
 #twitter connection libraries
+#	IMPORTANT: This script will not work with
+#	the standard tweepy files. Check the
+#	../tweepy-mods directory for the replacement
+#	scripts.
 from tweepy import Stream
 from tweepy import OAuthHandler
-from tweepy.streaming import StreamListener
-import tweepy
-import json
 
 #Database modules
 import sqlite3 as lite
-import sys
-import re
 
+import sys
 sys.path.insert(0, '/home/steven/Documents/code/python')
 from keys import *
 
+#============================================================
+#Should be in a seperate file..
+from tweepy.streaming import StreamListener
+import tweepy
+
+import json
+import re
+
 class listener(StreamListener):
+  
+    def __init__(self):
+      self.tweet_count = 0
 
     def on_data(self, data):
+      #Test if this is an actual tweet
       try:
-	post_id=json.loads(data)['id']
-	#print post_id
 	post_text=json.loads(data)['text']
-	post_text=re.sub(r'\W\s', '', post_text)
-	post_text=re.sub(r'(?<!\w)@\w+', '', post_text)
-	print post_text
-	post_rt=json.loads(data)['retweeted']
-	#print post_rt
-	post_creat_time=json.loads(data)['created_at']
-	#print post_creat_time
-	print self.test_var
-	self.test_var+=1
-	
-	#--------------- WRITING TO DATABASE
+	#Find out if the tweet is new or retweeted
+	try:
+	  #Retweet!
+	  post_rts=json.loads(data)['retweeted_status']
+	  retweeted_status=True
+	except KeyError:
+	  #New tweet!
+	  retweeted_status=False
 
-	try: 
-	    
-	    tweet=[(self.test_var, post_id, post_text, post_rt, post_creat_time)]
-	    
-	    query = "INSERT INTO tweets VALUES (?, ?, ?, ? ,?)"
-	    self.cur.executemany(query, tweet)
-	    
-
-	except lite.Error, e:
-	    
-	    if self.con:
-		self.con.rollback()
-	    
-	    print 'Error %s' % e    
-	    sys.exit(1)
-	    
-		
-	if self.test_var > 100000:
+	self.write_to_db(data,retweeted_status)
+	      
+	if self.tweet_count > 50000:
 	  if self.con:
 	    self.con.commit()
 	    self.con.close()
 	  return False
 	else:
 	  return True
-	
       except KeyError:
-	sterfs='--not interesting data--'
-	print sterfs
 	return True
-      else:
-	print '!!ERROR!!'
-	return False
 
     def on_error(self, status):
         print status
+     
+    def on_delete(self, status_id, user_id):
+        self.delout.write( str(status_id) + "\n")
+        return
+
+    def on_limit(self, track):
+        sys.stderr.write(track + "\n")
+        return
+
+    def on_error(self, status_code):
+        sys.stderr.write('Error: ' + str(status_code) + "\n")
+        return False
+
+    def on_timeout(self):
+        sys.stderr.write("Timeout, sleeping for 60 seconds...\n")
+        time.sleep(60)
+        return 
+        
+    def write_to_db(self, data,rt_stat):
+      post_rt=json.loads(data)['retweeted']
+      post_id=json.loads(data)['id']
+      post_text=json.loads(data)['text']
+      post_text=re.sub(r'\W\s', '', post_text)
+      #post_text=re.sub(r'(?<!\w)@\w+', '', post_text)
+      print self.tweet_count
+      print post_text
+      post_creat_time=json.loads(data)['created_at']
+      self.tweet_count+=1
+      
+      #--------------- WRITING TO DATABASE
+
+      try: 
+	  
+	  tweet=[(self.tweet_count, post_id, post_text, post_rt, rt_stat, post_creat_time)]
+	  
+	  query = "INSERT INTO tweets VALUES (?, ?, ?, ?, ? ,?)"
+	  self.cur.executemany(query, tweet)
+	  
+
+      except lite.Error, e:
+	  
+	  if self.con:
+	      self.con.rollback()
+	  
+	  print 'Error %s' % e    
+	  sys.exit(1)
+#=======================================================================
 
 
-
-#Open database
+#Open & create database
 con = None
 
 try:
@@ -80,13 +112,17 @@ try:
     cur = con.cursor()  
     
     cur.execute("DROP TABLE IF EXISTS tweets")
-    cur.execute("CREATE TABLE tweets(our_id INT PRIMARY KEY, tweet_id INT, body TEXT, retweet BOOLEAN, created DATE)")
-    #query = "INSERT INTO cars (id, name, price) VALUES (%s, %s, %s)"
-    #cur.executemany(query, cars)
+    query="CREATE TABLE tweets(\
+    our_id INT PRIMARY KEY,\
+    tweet_id INT,\
+    body TEXT,\
+    retweeted BOOLEAN,\
+    retweeted_status BOOLEAN,\
+    created DATE)"
+    cur.execute(query)
         
     con.commit()
     
-
 except lite.Error, e:
     
     if con:
@@ -94,19 +130,18 @@ except lite.Error, e:
     
     print 'Error %s' % e    
     sys.exit(1)
-    
-    
+
 finally:
     
     if con:
         con.close()
 
 #Connect to twitter
-is_global=0;
 
 auth = OAuthHandler(ckey, csecret)
 auth.set_access_token(atoken, asecret)
 twitterStream = Stream(auth, listener())
 
 twitterStream.filter(track=['and'],languages=['en'])
-#filter for 'and' is a hack to get languages to work
+#languages filter doesn't work with out a tracking
+#filter, so we add a bogus one.
