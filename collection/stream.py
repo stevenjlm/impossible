@@ -30,18 +30,30 @@ class listener(StreamListener):
       #Test if this is an actual tweet
       try:
 	post_text=json.loads(data)['text']
+	
 	#Find out if the tweet is new or retweeted
 	try:
-	  #Retweet!
 	  post_rts=json.loads(data)['retweeted_status']
+	  #Retweet!
 	  retweeted_status=True
 	except KeyError:
 	  #New tweet!
 	  retweeted_status=False
+	  
+	#Find out if the tweet is a reply
+	post_res=json.loads(data)['in_reply_to_status_id']
+	print post_res
+	if post_res==None:
+	  is_response=False
+	else:
+	  #New thread!
+	  is_response=True
+	  
+	
 
-	self.write_to_db(data,retweeted_status)
+	self.write_to_db(data,retweeted_status, is_response)
 	      
-	if self.tweet_count > 50000:
+	if self.tweet_count > 10000:
 	  if self.con:
 	    self.con.commit()
 	    self.con.close()
@@ -71,7 +83,7 @@ class listener(StreamListener):
         time.sleep(60)
         return 
         
-    def write_to_db(self, data,rt_stat):
+    def write_to_db(self, data,rt_stat, is_response):
       post_rt=json.loads(data)['retweeted']
       post_id=json.loads(data)['id']
       post_text=json.loads(data)['text']
@@ -86,9 +98,9 @@ class listener(StreamListener):
 
       try: 
 	  
-	  tweet=[(self.tweet_count, post_id, post_text, post_rt, rt_stat, post_creat_time)]
+	  tweet=[(self.tweet_count, post_id, post_text, post_rt, rt_stat, is_response, post_creat_time)]
 	  
-	  query = "INSERT INTO tweets VALUES (?, ?, ?, ?, ? ,?)"
+	  query = "INSERT INTO tweets VALUES (?, ?, ?, ?, ?, ? ,?)"
 	  self.cur.executemany(query, tweet)
 	  
 
@@ -118,6 +130,7 @@ try:
     body TEXT,\
     retweeted BOOLEAN,\
     retweeted_status BOOLEAN,\
+    is_reply BOOLEAN,\
     created DATE)"
     cur.execute(query)
         
