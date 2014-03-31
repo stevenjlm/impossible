@@ -1,6 +1,15 @@
+#
+#		Project AAKI's Rankings
+#		Data Analyser
+#			Reads test data from Twitter database
+#			Creates Naive Bayes learning model
+#
+#	Steven and Max
+#		https://github.com/stevenjlm/impossible
+#		License in README.markdown
+
 from __future__ import division
 import nltk, re, pprint
-from optparse import OptionParser
 
 import sqlite3 as lite
 
@@ -22,13 +31,12 @@ def filter_text(raw_text):
 #Open database
 con = None
 raw_text=''
-tokens = nltk.word_tokenize(raw_text)
-tweet_set = [] #will be a list of tuples
-all_text=''
-total_count=0
-reply_count=0
-new_count=0
-maximum=2000
+tweet_set = []     # will be a list of tuples
+all_text=''        # String with all text data from twitter
+total_count=0      # Number of tweets
+reply_count=0      # Number of tweets that are replies
+new_count=0        # ------- that are original
+maximum=2000       # Maximum number of tweets
 
 try:
      
@@ -47,7 +55,7 @@ try:
 	
 	text_row=filter_text(data[2])
 	
-	#use [4] for retweets
+	#use [4] for retweets rather than replies
 	if data[5] == 1:
 	  #Is a reply
 	  if reply_count<(maximum/2+1):
@@ -105,23 +113,3 @@ classifier = nltk.NaiveBayesClassifier.train(train_set)
 print nltk.classify.accuracy(classifier, test_set)
 
 classifier.show_most_informative_features(10)
-#raw_text="Yo dawg, you're totally right! I'm so derp"
-raw_text="Attention, I will now be eating breakfeast at 10am now"
-tokens = nltk.word_tokenize(raw_text)
-#tweet_test=[]
-#tweet_test.append(list(tokens))
-featuretest = document_features(tokens)
-
-dist = classifier.prob_classify(featuretest)
-for label in dist.samples():
-    print("%s: %f" % (label, dist.prob(label)))
-    
-raw_text="Yo dawg, you're totally right! I'm so derp"
-tokens = nltk.word_tokenize(raw_text)
-#tweet_test=[]
-#tweet_test.append(list(tokens))
-featuretest = document_features(tokens)
-
-dist = classifier.prob_classify(featuretest)
-for label in dist.samples():
-    print("%s: %f" % (label, dist.prob(label)))

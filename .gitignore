@@ -1,0 +1,6 @@
+#Backup scripts and data
+/twitter_api/bk
+#Databases
+.db
+#Outdated backups
+/old/

@@ -1,3 +1,17 @@
+#
+#		Project AAKI's Rankings
+#		Testing Streamer
+#			Gathers test data from Twitter
+#			Saves it to SQLite3 database
+#
+#	Steven and Max
+#		https://github.com/stevenjlm/impossible
+#		License in README.markdown
+
+# ======================= THIS CODE WAS ABANDONED ==================
+# See other files in directory
+# ==================================================================
+
 from __future__ import division
 import nltk, re, pprint
 
@@ -6,7 +20,7 @@ import sqlite3 as lite
 import random
 import nltk
 
-#FILTERS for raw text
+#Filtering function for raw text
 def filter_text(raw_text):
   raw_text=raw_text.lower()
   raw_text=re.sub(r'\W\s', '', raw_text)
