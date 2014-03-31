@@ -4,3 +4,5 @@
 .db
 #Outdated backups
 /old/
+#gedit and kate editing files
+*.*~
