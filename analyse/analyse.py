@@ -13,23 +13,22 @@
 # ==================================================================
 
 from __future__ import division
-import nltk, re, pprint
+import nltk, re
 
 import sqlite3 as lite
 
 import random
-import nltk
 
 #Filtering function for raw text
 def filter_text(raw_text):
-  raw_text=raw_text.lower()
-  raw_text=re.sub(r'\W\s', '', raw_text)
-  raw_text=re.sub(r'(?<!\w)@\w+', '', raw_text)
-  raw_text=re.sub('[^\x00-\x7F]+', ' ', raw_text)
-  raw_text=re.sub('rt', '', raw_text)
-  raw_text=re.sub('#', ' ', raw_text)
-  raw_text=re.sub('^https?:\/\/.*[\r\n]*', ' ', raw_text)
-  return raw_text
+    raw_text=raw_text.lower()
+    raw_text=re.sub(r'\W\s', '', raw_text)
+    raw_text=re.sub(r'(?<!\w)@\w+', '', raw_text)
+    raw_text=re.sub('[^\x00-\x7F]+', ' ', raw_text)
+    raw_text=re.sub('rt', '', raw_text)
+    raw_text=re.sub('#', ' ', raw_text)
+    raw_text=re.sub('^https?:\/\/.*[\r\n]*', ' ', raw_text)
+    return raw_text
 
 #Open database
 con = None

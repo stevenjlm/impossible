@@ -44,7 +44,6 @@ try:
   
     cur = con.cursor()
     cur.execute("SELECT * FROM tweets")
-    update_tuple=[]
 
     while total_count<(maximum+1):
       

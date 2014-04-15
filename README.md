@@ -1,6 +1,6 @@
 # Impossible Hackathon: Project Aaki's Rankings
 
-Proof of concept code for streaming, storing, and ranking wishes on www.impossible.com. Content management on the website can use the rankings to help users post and search for wishes.
+Code for streaming, storing, and ranking wishes on www.impossible.com. Content management on the website can use the rankings to help users post and search for wishes.
 
 ## Illustration
 
@@ -12,26 +12,18 @@ Teresa starts growing beats in her garden while giving some to local residents. 
 
 ## Progress Report
 
-This program does not yet use data from impossible.com. The hackathon API does not provide enough data to perform meaningful statistics. For now, we use twitter data to test machine learning algorithms.
-
-The program currently streams live data from Twitter. We then train the program to recognize the language features that differentiate tweet replies from original tweets. This is analagous to finding the language features that differentiate wishes that have been fulfuled versus wishes that have gone ignored.
+Check the "final" directory for operational code. All other directory's are for testing and debugging.
 
 ## Project Setup
 
-To run the program you must first install the correct python modules listed in the "requirements.txt" file. You will need internet access, but only through http, and https protocols.
+To run the program you must first install the correct python modules listed in the "requirements.txt" file. You also need to laod the impossible.com database dumb onto a MySQL server.
 
-To collect data, go to the "twitter_api" directory and type
+Once this is done, simply type
 
 ```bash
-~/twitter/api$python stream.py
+~/final$python analyse_run1.py
 ```
 in the shell.
-
-To analyse data, place the "twitter.db" file in the analyse directory. Run the following command,
-
-```bash
-~/analyse/api$python analyse.py
-```
 
 ## Works in Progress
 
