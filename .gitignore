@@ -6,3 +6,4 @@
 /old/
 #gedit and kate editing files
 *.*~
+*.pyc
